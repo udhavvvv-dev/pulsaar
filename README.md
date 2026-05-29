@@ -26,7 +26,7 @@
 
 ## 📸 Preview
 
-![Pulsar Widget](screenshots/preview.png)
+![Pulsar Widget](screenshots/preview.jpg)
 
 ---
 
