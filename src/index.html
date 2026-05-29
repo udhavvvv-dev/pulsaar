@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pulsar</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { background: transparent !important; width: 100%; height: 100%; }
+    body { font-family: 'JetBrains Mono', monospace; user-select: none; display: flex; justify-content: center; align-items: flex-start; }
+    .widget {
+      background: rgba(13,13,15,0.96);
+      border-radius: 20px;
+      border: 0.5px solid rgba(255,255,255,0.08);
+      padding: 20px;
+      color: #e8e8ea;
+      width: 380px;
+      min-height: 560px;
+    }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; cursor:move; }
+    .header-title { font-size:10px; letter-spacing:0.12em; color:rgba(255,255,255,0.3); }
+    .live-pill { display:flex; align-items:center; gap:5px; background:rgba(100,220,120,0.1); border:0.5px solid rgba(100,220,120,0.25); border-radius:20px; padding:3px 10px; font-size:10px; color:#64dc78; }
+    .live-dot { width:6px; height:6px; border-radius:50%; background:#64dc78; animation:blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .close-btn { width:12px; height:12px; border-radius:50%; background:#ff5f5f; border:none; cursor:pointer; }
+    .minimize-btn { width:12px; height:12px; border-radius:50%; background:#ffbd2e; border:none; cursor:pointer; margin-left:8px; }
+    .metrics-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:14px; }
+    .mc { background:rgba(255,255,255,0.04); border:0.5px solid rgba(255,255,255,0.07); border-radius:12px; padding:10px 6px; text-align:center; cursor:pointer; transition:all 0.2s; }
+    .mc:hover { background:rgba(255,255,255,0.07); transform:translateY(-1px); }
+    .mc.active { border-width:1px; }
+    .mc-label { font-size:9px; letter-spacing:0.12em; color:rgba(255,255,255,0.3); text-transform:uppercase; margin-bottom:4px; }
+    .mc-val { font-size:19px; font-weight:600; line-height:1; }
+    .mc-unit { font-size:9px; color:rgba(255,255,255,0.3); margin-top:2px; }
+    .graph-box { background:rgba(255,255,255,0.02); border:0.5px solid rgba(255,255,255,0.06); border-radius:14px; padding:14px; margin-bottom:14px; }
+    .graph-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .graph-title { font-size:9px; letter-spacing:0.1em; color:rgba(255,255,255,0.3); text-transform:uppercase; }
+    .graph-current { font-size:13px; font-weight:600; }
+    .bar-label-row { display:flex; justify-content:space-between; font-size:9px; color:rgba(255,255,255,0.25); margin-bottom:4px; }
+    .bar-track { width:100%; height:5px; background:rgba(255,255,255,0.06); border-radius:3px; overflow:hidden; margin-bottom:10px; }
+    .bar-fill { height:100%; border-radius:3px; transition:width 0.5s ease; }
+    canvas { width:100%; height:52px; display:block; }
+    .divider { border:none; border-top:0.5px solid rgba(255,255,255,0.06); margin:12px 0; }
+    .temp-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px; }
+    .temp-card { background:rgba(255,255,255,0.03); border:0.5px solid rgba(255,255,255,0.06); border-radius:10px; padding:8px 10px; }
+    .temp-name { font-size:9px; color:rgba(255,255,255,0.3); letter-spacing:0.06em; margin-bottom:2px; }
+    .temp-val { font-size:13px; font-weight:600; }
+    .apps-label { font-size:9px; letter-spacing:0.1em; color:rgba(255,255,255,0.25); text-transform:uppercase; margin-bottom:8px; }
+    .app-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .app-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .app-name { flex:1; font-size:11px; color:rgba(255,255,255,0.6); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .app-mini-bar { width:60px; height:3px; background:rgba(255,255,255,0.06); border-radius:2px; overflow:hidden; }
+    .app-mini-fill { height:100%; border-radius:2px; }
+    .app-pct { font-size:11px; color:rgba(255,255,255,0.4); width:44px; text-align:right; }
+    .alert-box { background:rgba(255,95,95,0.08); border:0.5px solid rgba(255,95,95,0.2); border-radius:8px; padding:8px 12px; font-size:11px; color:#ff7070; display:none; align-items:center; gap:7px; margin-top:10px; }
+  </style>
+</head>
+<body>
+<div class="widget">
+  <div class="header" id="drag-region">
+    <button class="close-btn" id="close-btn" title="Close"></button>
+    <button class="minimize-btn" id="minimize-btn" title="Minimize to tray"></button>
+    <span class="header-title">PULSAR</span>
+    <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+  </div>
+  <div class="metrics-grid">
+    <div class="mc active" id="card-cpu" onclick="selectMetric('cpu')">
+      <div class="mc-label">CPU</div>
+      <div class="mc-val" id="v-cpu">--</div>
+      <div class="mc-unit">%</div>
+    </div>
+    <div class="mc" id="card-gpu" onclick="selectMetric('gpu')">
+      <div class="mc-label">GPU</div>
+      <div class="mc-val" id="v-gpu">--</div>
+      <div class="mc-unit">%</div>
+    </div>
+    <div class="mc" id="card-ram" onclick="selectMetric('ram')">
+      <div class="mc-label">RAM</div>
+      <div class="mc-val" id="v-ram">--</div>
+      <div class="mc-unit">GB</div>
+    </div>
+    <div class="mc" id="card-fps" onclick="selectMetric('fps')">
+      <div class="mc-label">FPS</div>
+      <div class="mc-val" id="v-fps">--</div>
+      <div class="mc-unit">fps</div>
+    </div>
+  </div>
+  <div class="graph-box">
+    <div class="graph-header">
+      <span class="graph-title" id="g-title">CPU HISTORY — 60s</span>
+      <span class="graph-current" id="g-current">--%</span>
+    </div>
+    <div class="bar-label-row"><span id="bar-lbl">CPU Load</span><span id="bar-pct">--%</span></div>
+    <div class="bar-track"><div class="bar-fill" id="main-bar"></div></div>
+    <canvas id="sparkCanvas" width="340" height="52"></canvas>
+  </div>
+  <hr class="divider">
+  <div class="temp-row">
+    <div class="temp-card">
+      <div class="temp-name">CPU TEMP</div>
+      <div class="temp-val" id="t-cpu">--°C</div>
+    </div>
+    <div class="temp-card">
+      <div class="temp-name">GPU TEMP</div>
+      <div class="temp-val" id="t-gpu">--°C</div>
+    </div>
+    <div class="temp-card">
+      <div class="temp-name">PLATFORM</div>
+      <div class="temp-val" id="t-os" style="font-size:11px; color:rgba(255,255,255,0.5);">--</div>
+    </div>
+  </div>
+  <hr class="divider">
+  <div class="apps-label">Top CPU Consumers</div>
+  <div id="apps-list"></div>
+  <div class="alert-box" id="alert-box"><span>⚠</span><span id="alert-txt"></span></div>
+</div>
+<script type="module" src="/tauri.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
