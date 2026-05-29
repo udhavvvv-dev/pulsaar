@@ -1,9 +1,7 @@
 <div align="center">
 
 # 🌟 Pulsar
-
 ### A beautiful, lightweight system monitor widget for macOS, Windows, and Linux
-
 > Real-time CPU, GPU, RAM, temperature and top process monitoring — in a sleek floating widget
 
 </div>
@@ -36,13 +34,17 @@
 
 > No coding required. Just download and run.
 
-Go to the [**Releases**](https://github.com/YOURUSERNAME/pulsar/releases) page or the [**Actions**](https://github.com/YOURUSERNAME/pulsar/actions) tab and download the file for your OS:
+1. Go to the [**Actions**](https://github.com/udhavvvv-dev/pulsaar/actions) tab
+2. Click the **latest successful run** (green ✅)
+3. Scroll down to **Artifacts** and download for your OS:
 
-| Platform | File | How to install |
+| Platform | Artifact | How to install |
 |---|---|---|
-| 🍎 **macOS** | `Pulsar_1.0.0_aarch64.dmg` | Double-click → drag to Applications → open |
-| 🪟 **Windows** | `Pulsar_1.0.0_x64-setup.exe` | Double-click → follow installer |
-| 🐧 **Linux** | `pulsar_1.0.0_amd64.AppImage` | Right-click → Allow executing as program → double-click |
+| 🍎 **macOS** | `Pulsar-macOS` | Extract → double-click `.dmg` → drag to Applications |
+| 🪟 **Windows** | `Pulsar-Windows` | Extract → double-click `.exe` → follow installer |
+| 🐧 **Linux** | `Pulsar-Linux` | Extract → right-click `.AppImage` → Allow executing as program → double-click |
+
+> **Note:** You need a free GitHub account to download artifacts from Actions.
 
 ---
 
@@ -61,6 +63,7 @@ Go to the [**Releases**](https://github.com/YOURUSERNAME/pulsar/releases) page o
 Only needed if you want to modify the code. Otherwise just download above.
 
 ### Prerequisites
+
 - [Node.js](https://nodejs.org) LTS
 - [Rust](https://rustup.rs)
 
@@ -68,8 +71,8 @@ Only needed if you want to modify the code. Otherwise just download above.
 
 ```bash
 # Clone the repo
-git clone https://github.com/YOURUSERNAME/pulsar.git
-cd pulsar
+git clone https://github.com/udhavvvv-dev/pulsaar.git
+cd pulsaar
 
 # Install dependencies
 npm install
